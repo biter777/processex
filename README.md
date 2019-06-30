@@ -1,7 +1,7 @@
 ProcessEx
 =======
 
-ProcessEx - find a os.Process (system process) by Name (FindByName) or PID (Find), crossplatform, lightly, fast and full compatible with stdlib os.Process.
+ProcessEx - find a os.Process (operating system process) by Name (FindByName) or PID (Find), crossplatform, lightly, fast and full compatible with stdlib os.Process.
 
 [![GoDoc](http://godoc.org/github.com/biter777/processex?status.svg)](http://godoc.org/github.com/biter777/processex)
 

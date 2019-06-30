@@ -1,4 +1,4 @@
-// ProcessEx - find a os.Process (system process) by Name (FindByName) or PID (Find), crossplatform, lightly, fast and full compatible with stdlib os.Process.
+// ProcessEx - find a os.Process (operating system process) by Name (FindByName) or PID (Find), crossplatform, lightly, fast and full compatible with stdlib os.Process.
 
 /*********************** E X A M P L E ***********************\
 func main() {
@@ -26,13 +26,10 @@ func Find(pid int) (*os.Process, error) {
 
 // ------------------------------------------------------------------
 
-// FindByName looks for a running process by its pid.
+// FindByName looks for a running process by its name.
 //
 // The Process it returns can be used to obtain information
 // about the underlying operating system process.
-//
-// On Unix systems, FindProcess always succeeds and returns a Process
-// for the given pid, regardless of whether the process exists.
 func FindByName(name string) (*os.Process, error) {
 	return newFinder().FindByName(name)
 }
@@ -46,6 +43,4 @@ func Start(name string, argv []string, attr *os.ProcAttr) (*os.Process, error) {
 	return os.StartProcess(name, argv, attr)
 }
 
-// ------------------------------------------------------------------
-// ------------------------------------------------------------------
 // ------------------------------------------------------------------
