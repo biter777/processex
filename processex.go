@@ -1,14 +1,19 @@
-// ProcessEx - find a os.Process (operating system process) by Name (FindByName) or PID (Find), crossplatform, lightly, fast and full compatible with stdlib os.Process.
+/*
+Package processex - find a os.Process (operating system process) by Name (FindByName) or PID (Find), crossplatform, lightly, fast and full compatible with stdlib os.Process.
 
-/*********************** E X A M P L E ***********************\
-func main() {
+Usage
+
+	func main() {
 	process, err := processex.FindByName("explorer.exe")
 	if err != nil {
 		fmt.Printf("explorer.exe PID: %v", process.Pid)
 	}
 }
-\************************* E N J O Y *************************/
 
+Contributing
+
+ Welcome pull requests, bug fixes and issue reports.
+ Before proposing a change, please discuss it first by raising an issue. */
 package processex
 
 import "os"
