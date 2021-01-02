@@ -1,21 +1,31 @@
+//+build !windows
+
 package processex
 
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync/atomic"
+	"time"
 )
 
 type linuxProcesses struct {
 	processes
+	updatedAt int64 //atomic time
 }
 
 func (p *linuxProcesses) fetchPID(path string) (int, error) {
-	return strconv.Atoi(path[6:strings.LastIndex(path, "/")])
+	indx := strings.LastIndex(path, "/")
+	if indx < 0 || len(path) < 7 {
+		return -1, fmt.Errorf("fetch pid error, path: %v", path)
+	}
+	return strconv.Atoi(path[6:indx])
 }
 
 // ------------------------------------------------------------------
@@ -44,7 +54,7 @@ func (p *linuxProcesses) walk(path string, info os.FileInfo, err error) error {
 	// are interested in. Run as root (sudo) and log the error, in case you want
 	// this information.
 	if err != nil {
-		return err
+		return nil
 	}
 
 	// We are only interested in files with a path looking like /proc/<pid>/status.
@@ -56,18 +66,16 @@ func (p *linuxProcesses) walk(path string, info os.FileInfo, err error) error {
 	// convert the <pid> into an integer. Log an error if it fails.
 	pid, err := p.fetchPID(path)
 	if err != nil {
-		// log.Println(err)
 		return err
 	}
 
 	// Extract the process name from within the first line in the buffer
 	name, err := p.fetchName(path)
 	if err != nil {
-		// log.Println(err)
 		return err
 	}
 
-	p.processes = append(p.processes, newProcess(name, pid, 0))
+	p.processes = append(p.processes, newProcessEx(name, pid, 0))
 	return nil
 }
 
@@ -75,25 +83,79 @@ func (p *linuxProcesses) walk(path string, info os.FileInfo, err error) error {
 
 func (p *linuxProcesses) make() {
 	if p.processes == nil {
-		p.processes = make([]*process, 0, 100)
+		p.processes = make([]*ProcessEx, 0, 100)
+	} else {
+		p.processes = p.processes[:0]
 	}
 }
 
 // ------------------------------------------------------------------
 
+func (p *linuxProcesses) getUpdatedAt() time.Time {
+	return time.Unix(atomic.LoadInt64(&p.updatedAt), 0)
+}
+
+func (p *linuxProcesses) setUpdatedAt() {
+	atomic.StoreInt64(&p.updatedAt, time.Now().Unix())
+}
+
 func (p *linuxProcesses) getProcesses() error {
+	if time.Now().Sub(p.getUpdatedAt()) < time.Second*3 {
+		return nil
+	}
+	p.setUpdatedAt()
 	p.make()
 	return filepath.Walk("/proc", p.walk)
 }
 
 // ------------------------------------------------------------------
 
-func (p *linuxProcesses) FindByName(name string) (*os.Process, error) {
+// FindByName - FindByName
+func (p *linuxProcesses) FindByName(name string) ([]*os.Process, []*ProcessEx, error) {
+	if name == "" {
+		return nil, nil, fmt.Errorf("%w, name is empty", ErrNotFound)
+	}
 	err := p.getProcesses()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return p.find(strings.ToLower(name))
+	return p.find(name, 0)
+}
+
+// FindByPID - FindByPID
+func (p *linuxProcesses) FindByPID(pid int) ([]*os.Process, []*ProcessEx, error) {
+	if pid == 0 {
+		return nil, nil, fmt.Errorf("%w, pid == 0", ErrNotFound)
+	}
+	err := p.getProcesses()
+	if err != nil {
+		return nil, nil, err
+	}
+	return p.find("", pid)
+}
+
+// ------------------------------------------------------------------
+
+type winProcesses struct {
+	processes
+}
+
+// ------------------------------------------------------------------
+
+func (p *winProcesses) getProcesses() error {
+	return errors.New("not windows os")
+}
+
+// ------------------------------------------------------------------
+
+// FindByName - FindByName
+func (p *winProcesses) FindByName(name string) ([]*os.Process, []*ProcessEx, error) {
+	return nil, nil, errors.New("not windows os")
+}
+
+// FindByPID - FindByPID
+func (p *winProcesses) FindByPID(pid int) ([]*os.Process, []*ProcessEx, error) {
+	return nil, nil, errors.New("not windows os")
 }
 
 // ------------------------------------------------------------------

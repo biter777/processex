@@ -1,9 +1,10 @@
+// +build windows
+
 package processex
 
 import (
+	"errors"
 	"os"
-	"runtime"
-	"strings"
 	"syscall"
 	"unsafe"
 
@@ -52,18 +53,46 @@ func (p *winProcesses) getProcesses() error {
 
 // ------------------------------------------------------------------
 
-func (p *winProcesses) FindByName(name string) (*os.Process, error) {
+// FindByName - FindByName
+func (p *winProcesses) FindByName(name string) ([]*os.Process, []*ProcessEx, error) {
 	err := p.getProcesses()
 	if err != nil {
 		return nil, err
 	}
-	return p.find(strings.ToLower(name))
+	return p.find(name, 0)
+}
+
+// FindByPID - FindByPID
+func (p *winProcesses) FindByPID(pid int) ([]*os.Process, []*ProcessEx, error) {
+	err := p.getProcesses()
+	if err != nil {
+		return nil, err
+	}
+	return p.find("", pid)
 }
 
 // ------------------------------------------------------------------
 
-func isWin() bool {
-	return strings.Contains(strings.ToLower(runtime.GOOS), "win")
+type linuxProcesses struct {
+	processes
+}
+
+// ------------------------------------------------------------------
+
+func (p *linuxProcesses) getProcesses() error {
+	return errors.New("not linux os")
+}
+
+// ------------------------------------------------------------------
+
+// FindByName - FindByName
+func (p *linuxProcesses) FindByName(name string) ([]*os.Process, []*ProcessEx, error) {
+	return nil, errors.New("not linux os")
+}
+
+// FindByPID - FindByPID
+func (p *linuxProcesses) FindByPID(int) ([]*os.Process, []*ProcessEx, error) {
+	return nil, errors.New("not linux os")
 }
 
 // ------------------------------------------------------------------

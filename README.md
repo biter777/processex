@@ -15,12 +15,19 @@ usage
 -----
 
 ```go
-func main() {
-	process, err := processex.FindByName("explorer.exe")
-	if err != nil {
-		fmt.Printf("explorer.exe PID: %v", process.Pid)
+	func main() {
+		processName := "explorer.exe"
+		process, err := processex.FindByName(processName)
+		if err == processex.ErrNotFound {
+			fmt.Printf("Process %v not running", processName)
+			os.Exit(0)
+		}
+		if err != nil {
+			fmt.Printf("Process %v find error: %v", processName, err)
+			os.Exit(1)
+		}
+		fmt.Printf("Process %v PID: %v", processName, process.Pid)
 	}
-}
 ```
 
 options

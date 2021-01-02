@@ -1,13 +1,13 @@
 package processex
 
 import (
+	"os"
 	"strings"
-	"syscall"
-
-	"golang.org/x/sys/windows"
 )
 
-type process struct {
+// ProcessEx - os.P
+type ProcessEx struct {
+	*os.Process
 	Name      string
 	PID       int
 	ParentPID int
@@ -15,34 +15,12 @@ type process struct {
 
 // ------------------------------------------------------------------
 
-func newProcess(name string, pid, parentPID int) *process {
-	return &process{
+func newProcessEx(name string, pid, parentPID int) *ProcessEx {
+	return &ProcessEx{
 		Name:      strings.ToLower(name),
 		PID:       pid,
 		ParentPID: parentPID,
 	}
-}
-
-// ------------------------------------------------------------------
-
-func newProcessFromEntry(entry *windows.ProcessEntry32) *process {
-	if entry == nil {
-		return nil
-	}
-	return newProcess(getProcessName(entry), int(entry.ProcessID), int(entry.ParentProcessID))
-}
-
-// ------------------------------------------------------------------
-
-func getProcessName(entry *windows.ProcessEntry32) string {
-	var endName uint8
-	for {
-		if entry.ExeFile[endName] == 0 {
-			break
-		}
-		endName++
-	}
-	return syscall.UTF16ToString(entry.ExeFile[:endName])
 }
 
 // ------------------------------------------------------------------

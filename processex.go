@@ -4,10 +4,17 @@ Package processex - find a os.Process (operating system process) by Name (FindBy
 Usage
 
 	func main() {
-	process, err := processex.FindByName("explorer.exe")
-	if err != nil {
-		fmt.Printf("explorer.exe PID: %v", process.Pid)
-	}
+		processName := "explorer.exe"
+		process, _, err := processex.FindByName(processName)
+		if err == processex.ErrNotFound {
+			fmt.Printf("Process %v not running", processName)
+			os.Exit(0)
+		}
+		if err != nil {
+			fmt.Printf("Process %v find error: %v", processName, err)
+			os.Exit(1)
+		}
+		fmt.Printf("Process %v PID: %v", processName, process.Pid)
 }
 
 Contributing
@@ -16,7 +23,9 @@ Contributing
  Before proposing a change, please discuss it first by raising an issue. */
 package processex
 
-import "os"
+import (
+	"os"
+)
 
 // Find looks for a running process by its pid.
 //
@@ -35,8 +44,18 @@ func Find(pid int) (*os.Process, error) {
 //
 // The Process it returns can be used to obtain information
 // about the underlying operating system process.
-func FindByName(name string) (*os.Process, error) {
-	return newFinder().FindByName(name)
+func FindByName(name string) ([]*os.Process, []*ProcessEx, error) {
+	return NewFinder().FindByName(name)
+}
+
+// ------------------------------------------------------------------
+
+// FindByPID looks for a running process by its PID.
+//
+// The Process it returns can be used to obtain information
+// about the underlying operating system process.
+func FindByPID(pid int) ([]*os.Process, []*ProcessEx, error) {
+	return NewFinder().FindByPID(pid)
 }
 
 // ------------------------------------------------------------------

@@ -1,14 +1,19 @@
 package processex
 
-import "os"
+import (
+	"os"
+)
 
-type finder interface {
-	FindByName(name string) (*os.Process, error)
+// Finder - system processes Finder
+type Finder interface {
+	FindByName(name string) ([]*os.Process, []*ProcessEx, error)
+	FindByPID(pid int) ([]*os.Process, []*ProcessEx, error)
 }
 
 // ------------------------------------------------------------------
 
-func newFinder() finder {
+// NewFinder - NewFinder
+func NewFinder() Finder {
 	switch {
 	case isWin():
 		return &winProcesses{}
