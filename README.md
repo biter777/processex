@@ -17,7 +17,7 @@ usage
 ```go
 	func main() {
 		processName := "explorer.exe"
-		process, err := processex.FindByName(processName)
+		process, _, err := processex.FindByName(processName)
 		if err == processex.ErrNotFound {
 			fmt.Printf("Process %v not running", processName)
 			os.Exit(0)
