@@ -57,7 +57,7 @@ func (p *winProcesses) getProcesses() error {
 func (p *winProcesses) FindByName(name string) ([]*os.Process, []*ProcessEx, error) {
 	err := p.getProcesses()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return p.find(name, 0)
 }
@@ -66,7 +66,7 @@ func (p *winProcesses) FindByName(name string) ([]*os.Process, []*ProcessEx, err
 func (p *winProcesses) FindByPID(pid int) ([]*os.Process, []*ProcessEx, error) {
 	err := p.getProcesses()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return p.find("", pid)
 }
@@ -87,12 +87,12 @@ func (p *linuxProcesses) getProcesses() error {
 
 // FindByName - FindByName
 func (p *linuxProcesses) FindByName(name string) ([]*os.Process, []*ProcessEx, error) {
-	return nil, errors.New("not linux os")
+	return nil, nil, errors.New("not linux os")
 }
 
 // FindByPID - FindByPID
 func (p *linuxProcesses) FindByPID(int) ([]*os.Process, []*ProcessEx, error) {
-	return nil, errors.New("not linux os")
+	return nil, nil, errors.New("not linux os")
 }
 
 // ------------------------------------------------------------------
