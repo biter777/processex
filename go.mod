@@ -1,3 +1,3 @@
-module github.com/biter777/processex
+module github.com/elliottcarlson/processex
 
 go 1.13
